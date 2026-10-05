@@ -9,7 +9,7 @@ export default function Hero() {
         <h1 className="text-5xl font-bold tracking-tight sm:text-6xl">
           Manage your work.
           <br />
-          <span className="text-blue-400">Get things done.</span>
+          <span className="text-[#E9F421]">Get things done.</span>
         </h1>
 
         <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-slate-400">
