@@ -2,21 +2,31 @@
 
 import { useState } from "react";
 
+// Task interface define kore dilam type safety-er jonno
+interface Task {
+    id: number;
+    title: string;
+    project: string;
+    status: string;
+    priority: "High" | "Medium" | "Low";
+    dueDate: string;
+}
+
 export default function Tasks() {
     const [showForm, setShowForm] = useState(false);
 
     // Form inputs state
     const [title, setTitle] = useState("");
     const [project, setProject] = useState("");
-    const [priority, setPriority] = useState("High");
+    const [priority, setPriority] = useState<"High" | "Medium" | "Low">("High");
     const [dueDate, setDueDate] = useState("");
-    const [editTaskId, setEditTaskId] = useState(null);
+    const [editTaskId, setEditTaskId] = useState<number | null>(null);
     const [search, setSearch] = useState("");
     const [sortBy, setSortBy] = useState("Newest");
-    const [statusFilter, setStatusFilter] = useState("All"); // Added missing state
+    const [statusFilter, setStatusFilter] = useState("All");
 
-    // Tasks state initialized with your mock data
-    const [tasks, setTasks] = useState([
+    // Tasks state initialized with mock data
+    const [tasks, setTasks] = useState<Task[]>([
         {
             id: 1,
             title: "Design landing page",
@@ -51,7 +61,6 @@ export default function Tasks() {
         },
     ]);
 
-    // Open form for adding a new task
     const handleOpenAddForm = () => {
         setEditTaskId(null);
         setTitle("");
@@ -61,8 +70,7 @@ export default function Tasks() {
         setShowForm(true);
     };
 
-    // Handle form submission (Create or Update)
-    const handleFormSubmit = (e) => {
+    const handleFormSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         
         if (!title.trim() || !project.trim() || !dueDate) {
@@ -77,15 +85,13 @@ export default function Tasks() {
         });
 
         if (editTaskId !== null) {
-            // Update existing task
             setTasks(tasks.map((task) => 
                 task.id === editTaskId 
                     ? { ...task, title, project, priority, dueDate: formattedDate } 
                     : task
             ));
         } else {
-            // Create new task
-            const newTask = {
+            const newTask: Task = {
                 id: Date.now(),
                 title,
                 project,
@@ -96,7 +102,6 @@ export default function Tasks() {
             setTasks([newTask, ...tasks]);
         }
         
-        // Reset form & close
         setTitle("");
         setProject("");
         setPriority("High");
@@ -105,11 +110,11 @@ export default function Tasks() {
         setShowForm(false);
     };
 
-    const handleDeleteTask = (id) => {
+    const handleDeleteTask = (id: number) => {
         setTasks(tasks.filter((task) => task.id !== id));
     };
 
-    const handleEditTask = (task) => {
+    const handleEditTask = (task: Task) => {
         setEditTaskId(task.id);
         setTitle(task.title);
         setProject(task.project);
@@ -118,20 +123,19 @@ export default function Tasks() {
         setShowForm(true);
     };
 
-    const handleStatusChange = (id, newsstatus) => {
+    // 'newsstatus' parameter e string type add kora hoyeche
+    const handleStatusChange = (id: number, newsstatus: string) => {
         setTasks(tasks.map((task) => 
             task.id === id ? { ...task, status: newsstatus } : task
         ));
     };
 
-    // Filter by search title & status filter
     const filterTasks = tasks.filter((task) => {
         const matchesSearch = task.title.toLowerCase().includes(search.toLowerCase());
         const matchesStatus = statusFilter === "All" || task.status === statusFilter;
         return matchesSearch && matchesStatus;
     });
 
-    // Sort tasks
     const sortedTasks = [...filterTasks].sort((a, b) => {
         if (sortBy === "Newest") {
             return b.id - a.id;
@@ -140,7 +144,8 @@ export default function Tasks() {
             return a.id - b.id;
         }
         if (sortBy === "Priority") {
-            const priorityOrder = {
+            // Explicit type casting fix for TS7053
+            const priorityOrder: Record<string, number> = {
                 High: 1,
                 Medium: 2,
                 Low: 3,
@@ -249,7 +254,7 @@ export default function Tasks() {
                                 </label>
                                 <select
                                     value={priority}
-                                    onChange={(e) => setPriority(e.target.value)}
+                                    onChange={(e) => setPriority(e.target.value as "High" | "Medium" | "Low")}
                                     className="w-full rounded-lg border border-slate-700 bg-slate-900 px-4 py-3 text-white outline-none focus:border-blue-500"
                                 >
                                     <option value="High">High</option>
@@ -305,17 +310,9 @@ export default function Tasks() {
                     <div className="text-right pr-6">Action</div>
                 </div>
 
-                {/* Tasks (Using sortedTasks) */}
+                {/* Tasks */}
                 <div>
-                    {
-                    
-                    sortedTasks.length === 0 ?(
-                        <div className="flex flex-col items-center justify-center gap-4 py-20 text-gray-400">
-                            <div className="text-2xl font-semibold">No tasks found</div>
-                                <p className="text-center text-sm"> Try adjusting your search or filter criteria.</p>
-                        </div>
-                    )
-                    :(sortedTasks.map((task) => (
+                    {sortedTasks.map((task) => (
                         <div
                             key={task.id}
                             className="grid gap-4 border-b border-slate-700 px-10 py-5 last:border-b-0 md:grid-cols-6 md:items-center"
@@ -385,8 +382,7 @@ export default function Tasks() {
                                 </button>
                             </div>
                         </div>
-                    )))
-                    }
+                    ))}
                 </div>
             </div>
         </main>
